@@ -1,2 +1,1 @@
-web: gunicorn app: app
-web: gunicorn app_with_handler:app
+web: gunicorn -b 0.0.0.0:$PORT main:app
