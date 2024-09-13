@@ -1,3 +1,4 @@
 Flask
 line-bot-sdk
-python-dotenv # 環境変数取得
+python-dotenv
+gunicorn
