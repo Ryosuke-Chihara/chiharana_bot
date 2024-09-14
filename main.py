@@ -25,7 +25,32 @@ keywords = [
     re.compile(r'tihara', re.IGNORECASE),
     re.compile(r'チハラ', re.IGNORECASE),
     re.compile(r'田原', re.IGNORECASE),
-    re.compile(r'地腹', re.IGNORECASE)
+    re.compile(r'地腹', re.IGNORECASE),
+    re.compile(r'血はら', re.IGNORECASE),
+    re.compile(r'ちんちん', re.IGNORECASE),
+    re.compile(r'チンチン', re.IGNORECASE),
+]
+thanks = [
+    re.compile(r'さんきゅ', re.IGNORECASE),
+    re.compile(r'サンキュ', re.IGNORECASE),
+    re.compile(r'thank', re.IGNORECASE),
+    re.compile(r'ありがと', re.IGNORECASE),
+]
+hey = [
+    re.compile(r'やっほ', re.IGNORECASE),
+    re.compile(r'ヤッホ', re.IGNORECASE),
+]
+good_morning = [
+    re.compile(r'おはよ', re.IGNORECASE),
+]
+hello = [
+    re.compile(r'こんにち', re.IGNORECASE),
+]
+good_evening = [
+    re.compile(r'こんばん', re.IGNORECASE),
+]
+good_night = [
+    re.compile(r'おやす', re.IGNORECASE),
 ]
 
 @app.route("/")
@@ -64,6 +89,68 @@ def handle_message(event):
             event.reply_token,
             TextSendMessage(text=reply_message)
         )
+        return
+
+    match = any(pattern.search(user_message) for pattern in thanks)
+    if match:
+        # 一致した場合、「どういたしまして」と返信
+        reply_message = "どういたしまして。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in hey)
+    if match:
+        # 一致した場合、「やっほー」と返信
+        reply_message = "やっほー。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in good_morning)
+    if match:
+        # 一致した場合、「おはよう」と返信
+        reply_message = "おはよう。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in hello)
+    if match:
+        # 一致した場合、「こんにちは。」と返信
+        reply_message = "こんにちは。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in good_evening)
+    if match:
+        # 一致した場合、「こんばんは」と返信
+        reply_message = "こんばんは。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in good_night)
+    if match:
+        # 一致した場合、「おやすみ。」と返信
+        reply_message = "おやすみ。。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+    
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT"))
