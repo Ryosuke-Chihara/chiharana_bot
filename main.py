@@ -2,107 +2,40 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-import random
-import re
-import os, dotenv
+import random, re, os, dotenv
 
 app = Flask(__name__)
 
 # LINEのチャネル設定
 dotenv.load_dotenv()
-LINE_CHANNEL_ACCESS_TOKEN =  os.environ["CHANNEL_ACCESS_TOKEN"]
+LINE_CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
 LINE_CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
-
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-# 部分一致を確認する正規表現のリスト
-keywords = [
-    re.compile(r'千原', re.IGNORECASE),
-    re.compile(r'ちはら', re.IGNORECASE),
-    re.compile(r'ちーちゃん', re.IGNORECASE),
-    re.compile(r'ちはらっち', re.IGNORECASE),
-    re.compile(r'茅原', re.IGNORECASE),
-    re.compile(r'苑原', re.IGNORECASE),
-    re.compile(r'chihara', re.IGNORECASE),
-    re.compile(r'tihara', re.IGNORECASE),
-    re.compile(r'チハラ', re.IGNORECASE),
-    re.compile(r'田原', re.IGNORECASE),
-    re.compile(r'地腹', re.IGNORECASE),
-    re.compile(r'血はら', re.IGNORECASE),
-    re.compile(r'ちんこ', re.IGNORECASE),
-    re.compile(r'ちんちん', re.IGNORECASE),
-    re.compile(r'チンチン', re.IGNORECASE),
-]
-funny = [
-    re.compile(r'おもろ', re.IGNORECASE),
-    re.compile(r'おもしろ', re.IGNORECASE),
-    re.compile(r'面白い', re.IGNORECASE),
-    re.compile(r'うける', re.IGNORECASE),
-    re.compile(r'笑った', re.IGNORECASE),
-    re.compile(r'わらった', re.IGNORECASE),
-    re.compile(r'涙出る', re.IGNORECASE),
-    re.compile(r'涙出た', re.IGNORECASE),
-    re.compile(r'涙でる', re.IGNORECASE),
-    re.compile(r'涙でた', re.IGNORECASE),
-    re.compile(r'最高', re.IGNORECASE),
-    re.compile(r'さいこう', re.IGNORECASE),
-    re.compile(r'さいこー', re.IGNORECASE),
-    re.compile(r'さいこ〜', re.IGNORECASE),
-    re.compile(r'天才', re.IGNORECASE),
-    re.compile(r'神', re.IGNORECASE),
-]
-sorry = [
-    re.compile(r'ごめん', re.IGNORECASE),
-    re.compile(r'遅れる', re.IGNORECASE),
-    re.compile(r'遅くなる', re.IGNORECASE),
-    re.compile(r'おそくなる', re.IGNORECASE),
-    re.compile(r'遅刻', re.IGNORECASE),
-]
-thanks = [
-    re.compile(r'さんきゅ', re.IGNORECASE),
-    re.compile(r'サンキュ', re.IGNORECASE),
-    re.compile(r'thank', re.IGNORECASE),
-    re.compile(r'ありがと', re.IGNORECASE),
-]
-hey = [
-    re.compile(r'やっほ', re.IGNORECASE),
-    re.compile(r'ヤッホ', re.IGNORECASE),
-]
-good_morning = [
-    re.compile(r'おはよ', re.IGNORECASE),
-]
-hello = [
-    re.compile(r'こんにち', re.IGNORECASE),
-    re.compile(r'こんちは', re.IGNORECASE),
-    re.compile(r'こんちわ', re.IGNORECASE),
-]
-good_evening = [
-    re.compile(r'こんばん', re.IGNORECASE),
-]
-good_night = [
-    re.compile(r'おやす', re.IGNORECASE),
-    re.compile(r'寝る', re.IGNORECASE),
-    re.compile(r'ねる', re.IGNORECASE),
-    re.compile(r'ねむい', re.IGNORECASE),
-    re.compile(r'眠い', re.IGNORECASE),
-]
-are_you_ok = [
-    re.compile(r'大丈夫？', re.IGNORECASE),
-]
-not_lonely = [
-    re.compile(r'寂しくない', re.IGNORECASE),
-    re.compile(r'さみしくない', re.IGNORECASE),
-]
-lonely = [
-    re.compile(r'寂しい', re.IGNORECASE),
-    re.compile(r'さみしい', re.IGNORECASE),
-]
-something_happen = [
-    re.compile(r'どうした', re.IGNORECASE),
-    re.compile(r'なんかあった', re.IGNORECASE),
-    re.compile(r'何かあった', re.IGNORECASE),
-]
+# パターンと返信メッセージの辞書
+patterns = {
+    "funny": ([
+        r'おもろ', r'おもしろ', r'面白い', r'うける', r'笑った', r'わらった', 
+        r'涙出る', r'涙出た', r'最高', r'さいこう', r'さいこー', r'天才', r'神'
+    ], "ありがとう。"),
+    "keywords": ([
+        r'千原', r'ちはら', r'ちーちゃん', r'ちはらっち', r'茅原', r'苑原', 
+        r'chihara', r'tihara', r'チハラ', r'田原', r'地腹', r'血はら', 
+        r'ちんこ', r'ちんちん', r'チンチン'
+    ], "地原な。"),
+    "thanks": ([r'さんきゅ', r'サンキュ', r'thank', r'ありがと'], "どういたしまして。"),
+    "sorry": ([r'ごめん', r'遅れる', r'遅くなる', r'遅刻'], random.choice(["許さん。", "いいよ。"])),
+    "hey": ([r'やっほ', r'ヤッホ'], "やっほー。"),
+    "good_morning": ([r'おはよ'], "おはよう。"),
+    "hello": ([r'こんにち', r'こんちは', r'こんちわ'], "こんにちは。"),
+    "good_evening": ([r'こんばん'], "こんばんは。"),
+    "good_night": ([r'おやす', r'寝る', r'ねる', r'ねむい', r'眠い'], "おやすみ。"),
+    "are_you_ok": ([r'大丈夫？'], "大丈夫。"),
+    "lonely": ([r'寂しい', r'さみしい'], "どうしたの。"),
+    "not_lonely": ([r'寂しくない', r'さみしくない'], "寂しくない。"),
+    "something_happen": ([r'どうした', r'なんかあった', r'何かあった'], "なんでもない。")
+}
 
 @app.route("/")
 def hello_world():
@@ -111,10 +44,7 @@ def hello_world():
 # Webhookエンドポイント
 @app.route("/callback", methods=['POST'])
 def callback():
-    # リクエストヘッダーから署名検証
     signature = request.headers['X-Line-Signature']
-
-    # リクエストボディを取得
     body = request.get_data(as_text=True)
     app.logger.info(f"Request body: {body}")
 
@@ -122,146 +52,25 @@ def callback():
         handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
-
     return 'OK'
+
+def match_reply(user_message, patterns):
+    for pattern_list, reply in patterns.values():
+        if any(re.search(p, user_message, re.IGNORECASE) for p in pattern_list):
+            return reply
+    return None
 
 # メッセージイベントの処理
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_message = event.message.text
-
-    # 正規表現で部分一致をチェック
-    match = any(pattern.search(user_message) for pattern in funny)
-
-    if match:
-        # 一致した場合、「ありがとう。」と返信
-        reply_message = "ありがとう。"
+    reply_message = match_reply(user_message, patterns)
+    
+    if reply_message:
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
         )
-        return
-
-    match = any(pattern.search(user_message) for pattern in keywords)
-
-    if match:
-        # 一致した場合、「地原な。」と返信
-        reply_message = "地原な。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in thanks)
-    if match:
-        # 一致した場合、「どういたしまして」と返信
-        reply_message = "どういたしまして。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in sorry)
-    if match:
-        # 一致した場合、「許さん／いいよ」と返信
-        reply_message = random.choice(["許さん。", "いいよ。"])
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in hey)
-    if match:
-        # 一致した場合、「やっほー」と返信
-        reply_message = "やっほー。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in good_morning)
-    if match:
-        # 一致した場合、「おはよう」と返信
-        reply_message = "おはよう。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in hello)
-    if match:
-        # 一致した場合、「こんにちは。」と返信
-        reply_message = "こんにちは。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in good_evening)
-    if match:
-        # 一致した場合、「こんばんは」と返信
-        reply_message = "こんばんは。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in good_night)
-    if match:
-        # 一致した場合、「おやすみ」と返信
-        reply_message = "おやすみ。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in not_lonely)
-    if match:
-        # 一致した場合、「寂しくない」と返信
-        reply_message = "寂しくない。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in lonely)
-    if match:
-        # 一致した場合、「どうしたの」と返信
-        reply_message = "どうしたの。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in are_you_ok)
-    if match:
-        # 一致した場合、「大丈夫」と返信
-        reply_message = "大丈夫。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
-
-    match = any(pattern.search(user_message) for pattern in something_happen)
-    if match:
-        # 一致した場合、「なんでもない」と返信
-        reply_message = "なんでもない。"
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_message)
-        )
-        return
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT"))
