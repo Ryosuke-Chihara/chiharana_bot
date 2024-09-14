@@ -2,6 +2,7 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+import random
 import re
 import os, dotenv
 
@@ -19,6 +20,8 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 keywords = [
     re.compile(r'千原', re.IGNORECASE),
     re.compile(r'ちはら', re.IGNORECASE),
+    re.compile(r'ちーちゃん', re.IGNORECASE),
+    re.compile(r'ちはらっち', re.IGNORECASE),
     re.compile(r'茅原', re.IGNORECASE),
     re.compile(r'苑原', re.IGNORECASE),
     re.compile(r'chihara', re.IGNORECASE),
@@ -29,6 +32,31 @@ keywords = [
     re.compile(r'血はら', re.IGNORECASE),
     re.compile(r'ちんちん', re.IGNORECASE),
     re.compile(r'チンチン', re.IGNORECASE),
+]
+funny = [
+    re.compile(r'おもろ', re.IGNORECASE),
+    re.compile(r'おもしろ', re.IGNORECASE),
+    re.compile(r'面白い', re.IGNORECASE),
+    re.compile(r'うける', re.IGNORECASE),
+    re.compile(r'笑った', re.IGNORECASE),
+    re.compile(r'わらった', re.IGNORECASE),
+    re.compile(r'涙出る', re.IGNORECASE),
+    re.compile(r'涙出た', re.IGNORECASE),
+    re.compile(r'涙でる', re.IGNORECASE),
+    re.compile(r'涙でた', re.IGNORECASE),
+    re.compile(r'最高', re.IGNORECASE),
+    re.compile(r'さいこう', re.IGNORECASE),
+    re.compile(r'さいこー', re.IGNORECASE),
+    re.compile(r'さいこ〜', re.IGNORECASE),
+    re.compile(r'天才', re.IGNORECASE),
+    re.compile(r'神', re.IGNORECASE),
+]
+sorry = [
+    re.compile(r'ごめん', re.IGNORECASE),
+    re.compile(r'遅れる', re.IGNORECASE),
+    re.compile(r'遅くなる', re.IGNORECASE),
+    re.compile(r'おそくなる', re.IGNORECASE),
+    re.compile(r'遅刻', re.IGNORECASE),
 ]
 thanks = [
     re.compile(r'さんきゅ', re.IGNORECASE),
@@ -53,6 +81,10 @@ good_evening = [
 ]
 good_night = [
     re.compile(r'おやす', re.IGNORECASE),
+    re.compile(r'寝る', re.IGNORECASE),
+    re.compile(r'ねる', re.IGNORECASE),
+    re.compile(r'ねむい', re.IGNORECASE),
+    re.compile(r'眠い', re.IGNORECASE),
 ]
 are_you_ok = [
     re.compile(r'大丈夫？', re.IGNORECASE),
@@ -94,6 +126,17 @@ def handle_message(event):
     user_message = event.message.text
 
     # 正規表現で部分一致をチェック
+    match = any(pattern.search(user_message) for pattern in funny)
+
+    if match:
+        # 一致した場合、「ありがとう。」と返信
+        reply_message = "ありがとう。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
     match = any(pattern.search(user_message) for pattern in keywords)
 
     if match:
@@ -109,6 +152,16 @@ def handle_message(event):
     if match:
         # 一致した場合、「どういたしまして」と返信
         reply_message = "どういたしまして。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in sorry)
+    if match:
+        # 一致した場合、「許さん／いいよ」と返信
+        reply_message = random.choice(["許さん。", "いいよ。"])
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
