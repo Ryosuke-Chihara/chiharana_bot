@@ -30,6 +30,7 @@ keywords = [
     re.compile(r'田原', re.IGNORECASE),
     re.compile(r'地腹', re.IGNORECASE),
     re.compile(r'血はら', re.IGNORECASE),
+    re.compile(r'ちんこ', re.IGNORECASE),
     re.compile(r'ちんちん', re.IGNORECASE),
     re.compile(r'チンチン', re.IGNORECASE),
 ]
