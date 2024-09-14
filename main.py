@@ -1,4 +1,3 @@
-from flask_caching import Cache
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -6,7 +5,6 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import random, re, os, dotenv
 
 app = Flask(__name__)
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # LINEのチャネル設定
 dotenv.load_dotenv()
@@ -18,16 +16,16 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 # パターンと返信メッセージの辞書
 patterns = {
     "keywords": ([
-        r'千原', r'ちはら', r'ちーちゃん', r'ちはらっち', r'茅原', r'苑原', 
+        r'千原', r'ちはら', r'ちらら', r'ちーちゃん', r'ちはらっち', r'茅原', r'苑原',
         r'chihara', r'tihara', r'チハラ', r'田原', r'地腹', r'血はら', 
         r'ちんこ', r'ちんちん', r'チンチン'
     ], "地原な。"),
     "funny": ([
         r'おもろ', r'おもしろ', r'面白い', r'うける', r'笑った', r'わらった', 
-        r'涙出る', r'涙出た', r'最高', r'さいこう', r'さいこー', r'天才', r'神'
+        r'涙出る', r'涙出た', r'最高', r'さいこう', r'さいこー', r'天才', r'神', r'好き'
     ], "ありがとう。"),
     "thanks": ([r'さんきゅ', r'サンキュ', r'thank', r'ありがと'], "どういたしまして。"),
-    "sorry": ([r'ごめん', r'遅れる', r'遅くなる', r'遅刻', r'すまん', r'申し訳', r'もうしわけ', r'すみません'], random.choice(["許さん。", "いいよ。","許さん。"])),
+    "sorry": ([r'ごめん', r'遅れる', r'遅くなる', r'遅刻', r'すまん', r'申し訳', r'もうしわけ', r'すみません'], "許さん。"),
     "hey": ([r'やっほ', r'ヤッホ'], "やっほー。"),
     "good_morning": ([r'おはよ'], "おはよう。"),
     "hello": ([r'こんにち', r'こんちは', r'こんちわ'], "こんにちは。"),
