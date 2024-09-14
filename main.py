@@ -226,7 +226,7 @@ def handle_message(event):
     match = any(pattern.search(user_message) for pattern in not_lonely)
     if match:
         # 一致した場合、「寂しくない」と返信
-        reply_message = match + "。"
+        reply_message = "寂しくない。"
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
