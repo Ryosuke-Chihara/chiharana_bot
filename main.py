@@ -45,6 +45,8 @@ good_morning = [
 ]
 hello = [
     re.compile(r'こんにち', re.IGNORECASE),
+    re.compile(r'こんちは', re.IGNORECASE),
+    re.compile(r'こんちわ', re.IGNORECASE),
 ]
 good_evening = [
     re.compile(r'こんばん', re.IGNORECASE),
