@@ -90,6 +90,10 @@ good_night = [
 are_you_ok = [
     re.compile(r'大丈夫？', re.IGNORECASE),
 ]
+not_lonely = [
+    re.compile(r'寂しくない', re.IGNORECASE),
+    re.compile(r'さみしくない', re.IGNORECASE),
+]
 lonely = [
     re.compile(r'寂しい', re.IGNORECASE),
     re.compile(r'さみしい', re.IGNORECASE),
@@ -213,6 +217,16 @@ def handle_message(event):
     if match:
         # 一致した場合、「おやすみ」と返信
         reply_message = "おやすみ。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in not_lonely)
+    if match:
+        # 一致した場合、「寂しくない」と返信
+        reply_message = match + "。"
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
