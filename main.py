@@ -1,3 +1,4 @@
+from flask_caching import Cache
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -5,6 +6,7 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import random, re, os, dotenv
 
 app = Flask(__name__)
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # LINEのチャネル設定
 dotenv.load_dotenv()
@@ -58,7 +60,10 @@ def match_reply(user_message, patterns):
     for pattern_list, reply in patterns.values():
         if any(re.search(p, user_message, re.IGNORECASE) for p in pattern_list):
             return reply
-    return None
+
+    # キャッシュをクリア
+    cache.clear()
+    return
 
 # メッセージイベントの処理
 @handler.add(MessageEvent, message=TextMessage)
