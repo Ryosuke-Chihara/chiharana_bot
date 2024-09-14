@@ -52,6 +52,18 @@ good_evening = [
 good_night = [
     re.compile(r'おやす', re.IGNORECASE),
 ]
+are_you_ok = [
+    re.compile(r'大丈夫？', re.IGNORECASE),
+]
+lonely = [
+    re.compile(r'寂しい', re.IGNORECASE),
+    re.compile(r'さみしい', re.IGNORECASE),
+]
+something_happen = [
+    re.compile(r'どうした', re.IGNORECASE),
+    re.compile(r'なんかあった', re.IGNORECASE),
+    re.compile(r'何かあった', re.IGNORECASE),
+]
 
 @app.route("/")
 def hello_world():
@@ -143,14 +155,43 @@ def handle_message(event):
 
     match = any(pattern.search(user_message) for pattern in good_night)
     if match:
-        # 一致した場合、「おやすみ。」と返信
+        # 一致した場合、「おやすみ」と返信
         reply_message = "おやすみ。"
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
         )
         return
-    
+
+    match = any(pattern.search(user_message) for pattern in lonely)
+    if match:
+        # 一致した場合、「どうしたの」と返信
+        reply_message = "どうしたの。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in are_you_ok)
+    if match:
+        # 一致した場合、「大丈夫」と返信
+        reply_message = "大丈夫。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
+
+    match = any(pattern.search(user_message) for pattern in something_happen)
+    if match:
+        # 一致した場合、「なんでもない」と返信
+        reply_message = "なんでもない。"
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+        return
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT"))
