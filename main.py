@@ -144,7 +144,7 @@ def handle_message(event):
     match = any(pattern.search(user_message) for pattern in good_night)
     if match:
         # 一致した場合、「おやすみ。」と返信
-        reply_message = "おやすみ。。"
+        reply_message = "おやすみ。"
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
