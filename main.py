@@ -2,7 +2,9 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-import random, re, os, dotenv
+import re
+import os
+import dotenv
 
 app = Flask(__name__)
 
@@ -16,25 +18,12 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 # パターンと返信メッセージの辞書
 patterns = {
     "keywords": ([
-        r'千原', r'ちはら', r'ちらら', r'ちーちゃん', r'ちはらっち', r'茅原', r'苑原',
-        r'chihara', r'tihara', r'チハラ', r'田原', r'地腹', r'血はら', r'りょうすけ',
-        r'ちんこ', r'ちんちん', r'チンチン'
+        r'千原', r'茅原', r'苑原', r'田原', r'地腹', r'血はら'
     ], "地原な。"),
-    "funny": ([
-        r'おもろ', r'おもしろ', r'面白い', r'うける', r'笑った', r'わらった', 
-        r'涙出る', r'涙出た', r'最高', r'さいこう', r'さいこー', r'天才', r'神', r'好き'
-    ], "ありがとう。"),
-    "thanks": ([r'さんきゅ', r'サンキュ', r'thank', r'ありがと'], "どういたしまして。"),
-    "sorry": ([r'ごめん', r'遅れる', r'遅くなる', r'遅刻', r'すまん', r'申し訳', r'もうしわけ', r'すみません'], "許さん。"),
     "hey": ([r'やっほ', r'ヤッホ'], "やっほー。"),
     "good_morning": ([r'おはよ'], "おはよう。"),
     "hello": ([r'こんにち', r'こんちは', r'こんちわ', r'こんちゃ'], "こんにちは。"),
     "good_evening": ([r'こんばん'], "こんばんは。"),
-    "good_night": ([r'おやす', r'寝る', r'ねる', r'ねむい', r'眠い'], "おやすみ。"),
-    "are_you_ok": ([r'大丈夫？'], "大丈夫。"),
-    "lonely": ([r'寂しい', r'さみしい'], "どうしたの。"),
-    "not_lonely": ([r'寂しくない', r'さみしくない'], "寂しくない。"),
-    "something_happen": ([r'どうした', r'なんかあった', r'何かあった'], "なんでもない。")
 }
 
 @app.route("/")
@@ -58,9 +47,6 @@ def match_reply(user_message, patterns):
     for pattern_list, reply in patterns.values():
         if any(re.search(p, user_message, re.IGNORECASE) for p in pattern_list):
             return reply
-
-    # キャッシュをクリア
-    cache.clear()
     return
 
 # メッセージイベントの処理
